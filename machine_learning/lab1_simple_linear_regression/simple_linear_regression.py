@@ -1,3 +1,17 @@
+"""
+Fuel Consumption CO2 Emissions Linear Regression
+================================================
+
+This module demonstrates how to build a simple linear regression model
+to predict CO2 emissions based on engine size and other vehicle features.
+
+Dataset: 
+    Fuel consumption and CO2 emissions data for various vehicle models
+    
+Model: 
+    Linear regression for predicting CO2 emissions
+"""
+
 # Import necessary libraries
 import numpy as np
 import pandas as pd
@@ -7,25 +21,53 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
 
+
+def load_data(url):
+    """
+    Load the fuel consumption dataset from a URL.
+    
+    Args:
+        url (str): URL to the dataset CSV file
+        
+    Returns:
+        pandas.DataFrame: Loaded dataset
+    """
+    return pd.read_csv(url)
+
+
+def explore_data(df):
+    """
+    Explore the dataset by displaying samples, statistics, and checking for missing values.
+    
+    Args:
+        df (pandas.DataFrame): The dataset to explore
+        
+    Returns:
+        None: Outputs information about the dataset
+    """
+    # Display a sample of the dataset
+    print("Dataset sample (5 random rows):")
+    print(df.sample(5))
+
+    # Explore the data with statistical summary
+    print("\nStatistical summary of the data:")
+    print(df.describe())
+
+    # Check the data types and missing values
+    print("\nData types and non-null counts:")
+    print(df.info())
+
+    # Check for missing values
+    print("\nMissing values in each column:")
+    print(df.isnull().sum())
+
+
 # Load data directly from the URL
 url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-ML0101EN-SkillsNetwork/labs/Module%202/data/FuelConsumptionCo2.csv"
-df = pd.read_csv(url)
+df = load_data(url)
 
-# Display a sample of the dataset
-print("Dataset sample (5 random rows):")
-print(df.sample(5))
-
-# Explore the data with statistical summary
-print("\nStatistical summary of the data:")
-print(df.describe())
-
-# Check the data types and missing values
-print("\nData types and non-null counts:")
-print(df.info())
-
-# Check for missing values
-print("\nMissing values in each column:")
-print(df.isnull().sum())
+# Explore the dataset
+explore_data(df)
 
 # Visualize the distribution of CO2 emissions
 plt.figure(figsize=(10, 6))
