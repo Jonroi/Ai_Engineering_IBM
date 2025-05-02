@@ -37,29 +37,27 @@ def load_data():
     # churn_df = pd.read_csv("ChurnData.csv")
     url = "https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-ML0101EN-SkillsNetwork/labs/Module%203/data/ChurnData.csv"
     churn_df = pd.read_csv(url)
-
-    # Select relevant features and convert target to integer type
-    churn_df = churn_df[['tenure', 'age', 'address', 'income', 'ed', 'employ', 'equip', 'churn']]
-    churn_df['churn'] = churn_df['churn'].astype('int')
     
     return churn_df
 
 
-def extract_features(df):
+def extract_features(df, features, target_col='churn'):
     """
     Extract features and target variable from the dataframe.
     
     Args:
         df (pandas.DataFrame): The prepared churn dataframe
+        features (list): List of feature column names to use
+        target_col (str, optional): Name of the target column. Defaults to 'churn'.
         
     Returns:
         tuple: (X, y) where X is the feature array and y is the target array
     """
     # Extract features (X) from the dataset
-    X = np.asarray(df[['tenure', 'age', 'address', 'income', 'ed', 'employ', 'equip']])
+    X = np.asarray(df[features])
     
     # Extract target variable (y) - whether the customer churned or not
-    y = np.asarray(df['churn'])
+    y = np.asarray(df[target_col])
     
     return X, y
 
@@ -97,8 +95,27 @@ def train_model(X_train, y_train):
     Returns:
         LogisticRegression: Trained logistic regression model
     """
-    model = LogisticRegression().fit(X_train, y_train)
+    model = LogisticRegression(C=0.01).fit(X_train, y_train)
     return model
+
+
+def evaluate_model(model, X_test, y_test):
+    """
+    Evaluate the model using log loss metric.
+    
+    Args:
+        model (LogisticRegression): Trained logistic regression model
+        X_test (numpy.ndarray): Test feature matrix
+        y_test (numpy.ndarray): Test target vector
+        
+    Returns:
+        float: Log loss value
+    """
+    yhat = model.predict(X_test)
+    yhat_prob = model.predict_proba(X_test)
+    logloss = log_loss(y_test, yhat_prob)
+    
+    return logloss, yhat
 
 
 def visualize_coefficients(model, feature_names):
@@ -119,34 +136,81 @@ def visualize_coefficients(model, feature_names):
     plt.show()
 
 
-# Main execution
-if __name__ == "__main__":
-    # Load and prepare the dataset
-    churn_df = load_data()
+def run_experiment(df, features, title):
+    """
+    Run a logistic regression experiment with the given features.
+    
+    Args:
+        df (pandas.DataFrame): The dataset
+        features (list): List of feature column names to use
+        title (str): Title of the experiment
+        
+    Returns:
+        float: Log loss value
+    """
+    print(f"\n{title}")
+    print(f"Features used: {features}")
     
     # Extract features and target
-    X, y = extract_features(churn_df)
-    print("First 5 feature rows:")
-    print(X[0:5])
-    print("\nFirst 5 target values:")
-    print(y[0:5])
+    X, y = extract_features(df, features)
     
     # Preprocess data
     X_train, X_test, y_train, y_test = preprocess_data(X, y)
     
     # Train model
-    LR = train_model(X_train, y_train)
+    model = train_model(X_train, y_train)
     
-    # Make predictions
-    yhat = LR.predict(X_test)
-    print("\nFirst 10 predictions:")
-    print(yhat[:10])
+    # Evaluate model
+    logloss, yhat = evaluate_model(model, X_test, y_test)
+    print(f"Log Loss: {logloss}")
     
-    # Visualize feature coefficients
-    visualize_coefficients(LR, churn_df.columns[:-1])
+    return logloss
+
+
+# Main execution
+if __name__ == "__main__":
+    # Load the dataset
+    df = load_data()
     
-    # Note: For model evaluation, you could add:
-    # from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-    # print("Accuracy:", accuracy_score(y_test, yhat))
-    # print("Confusion Matrix:\n", confusion_matrix(y_test, yhat))
-    # print("Classification Report:\n", classification_report(y_test, yhat))
+    # Ensure 'churn' is integer type
+    df['churn'] = df['churn'].astype('int')
+    
+    # Original features
+    original_features = ['tenure', 'age', 'address', 'income', 'ed', 'employ', 'equip']
+    
+    # Original model
+    run_experiment(df, original_features, "Original Model")
+    
+    # Practice Exercises
+    print("\n\nPractice Exercises")
+    print("=================\n")
+    
+    # a. Add 'callcard' feature
+    features_a = original_features + ['callcard']
+    logloss_a = run_experiment(df, features_a, "a. Add 'callcard' feature")
+    
+    # b. Add 'wireless' feature
+    features_b = original_features + ['wireless']
+    logloss_b = run_experiment(df, features_b, "b. Add 'wireless' feature")
+    
+    # c. Add both 'callcard' and 'wireless' features
+    features_c = original_features + ['callcard', 'wireless']
+    logloss_c = run_experiment(df, features_c, "c. Add 'callcard' and 'wireless' features")
+    
+    # d. Remove 'equip' feature
+    features_d = [f for f in original_features if f != 'equip']
+    logloss_d = run_experiment(df, features_d, "d. Remove 'equip' feature")
+    
+    # e. Remove 'income' and 'employ' features
+    features_e = [f for f in original_features if f not in ['income', 'employ']]
+    logloss_e = run_experiment(df, features_e, "e. Remove 'income' and 'employ' features")
+    
+    # Summary of results
+    print("\nSummary of Results")
+    print("=================")
+    print(f"Original model log loss: {logloss_a}")
+    print(f"a. Add 'callcard' feature: {logloss_a}")
+    print(f"b. Add 'wireless' feature: {logloss_b}")
+    print(f"c. Add both features: {logloss_c}")
+    print(f"d. Remove 'equip' feature: {logloss_d}")
+    print(f"e. Remove 'income' and 'employ' features: {logloss_e}")
