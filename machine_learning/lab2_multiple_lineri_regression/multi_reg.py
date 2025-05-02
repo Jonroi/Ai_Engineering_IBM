@@ -37,9 +37,12 @@ def load_and_prepare_data():
     print("Dataset sample (5 random rows):")
     print(df.sample(5))
 
+    # Select only numeric columns for correlation analysis
+    numeric_df = df.select_dtypes(include=['float64', 'int64'])
+    
     # Calculate and display feature correlations with target variable
     print("\nCorrelation with CO2EMISSIONS:")
-    correlations = df.corr()['CO2EMISSIONS'].sort_values(ascending=False)
+    correlations = numeric_df.corr()['CO2EMISSIONS'].sort_values(ascending=False)
     print(correlations)
 
     # Extract features and target variable
