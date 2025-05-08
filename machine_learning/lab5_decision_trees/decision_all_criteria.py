@@ -71,7 +71,7 @@ print(f"Testing set shape: {X_testset.shape}")
 
 # Create and train the decision tree classifier
 print("\nTraining the Decision Tree model...")
-drugTree = DecisionTreeClassifier(criterion="entropy", max_depth=4)
+drugTree = DecisionTreeClassifier(criterion="entropy", max_depth=12)
 drugTree.fit(X_trainset, y_trainset)
 
 # Make predictions and evaluate the model
@@ -144,8 +144,8 @@ def extract_decision_paths(tree, feature_names, class_names):
         name = feature_names[feature[node]]
         thresh = threshold[node]
         
-        # Recurse left with "≤" condition
-        left_path = path + [f"{name} ≤ {thresh:.2f}"]
+        # Recurse left with "<=" condition (ASCII-compatible)
+        left_path = path + [f"{name} <= {thresh:.2f}"]
         recurse(children_left[node], left_path)
         
         # Recurse right with ">" condition
