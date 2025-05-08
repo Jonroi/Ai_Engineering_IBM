@@ -29,3 +29,4 @@ scaled_df = pd.DataFrame(scaled_features, columns=scaler.get_feature_names_out(c
 # Combining with the original dataset
 scaled_data = pd.concat([data.drop(columns=continuous_columns), scaled_df], axis=1)
 
+
